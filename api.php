@@ -6,13 +6,10 @@ header('Content-type: application/json');
 
 $db = new DataBaseConfig("localhost", "root", "");
 $db->createConnection();
-
-
 $pos = $db->select();
+$db->closeConnection();
 
 response("200", $pos);
-
-$db->closeConnection();
 
 function response($status, $data)
 {

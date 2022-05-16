@@ -11,26 +11,30 @@ class DataBaseConfig {
     }
 
     public function createConnection() {
-        $this->conn = new mysqli($this->servername, $this->username, $this->password);
-        if ($this->conn->connect_error) {
-            die("Connection failed: " . $this->conn>connect_error);
+        try {
+            $this->conn = new PDO("mysql:host=$this->servername;dbname = sa", $this->username, $this->password);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e){
+            echo "Connection failed: " . $e->getMessage();
         }
+
     }
 
     public function closeConnection() {
-        $this->conn->close();
-
+        $this->conn = null;
     }
 
     public function select()
     {
-        $sql = "SELECT posx, posy, posz FROM sa.position order by posid DESC LIMIT 1";
-        $result = $this->conn->query($sql);
-        $values = $result->fetch_object();
-        return array(
-            "posx" => $values->posx,
-            "posy" => $values->posy,
-            "posz" => $values->posz
-        );
+        $statement = $this->conn->prepare("SELECT posx, posy, posz FROM sa.position LIMIT 1");
+        if($statement->execute())
+        {
+            $values = $statement->fetch(PDO::FETCH_ASSOC);
+            return array(
+                "posx" => $values['posx'],
+                "posy" => $values['posy'],
+                "posz" => $values['posz']
+            );
+        }
     }
 }
